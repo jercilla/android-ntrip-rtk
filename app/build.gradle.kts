@@ -77,6 +77,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.usb.serial)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

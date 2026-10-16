@@ -12,8 +12,8 @@ data class AjustesApp(
     val urlDebug: String = URL_DEBUG_POR_DEFECTO,
 ) {
     companion object {
-        /** Baudrates habituales para el conversor USB-serie. */
-        val BAUDRATES = listOf(9600, 19200, 38400, 57600, 115200, 230400, 460800)
+        /** Baudrates habituales para el conversor USB-serie (4800 = GPS genéricos; 115200 = LC29H). */
+        val BAUDRATES = listOf(4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800)
 
         /** Servidor de desarrollo por defecto (tools/devserver). Editable en Ajustes. */
         const val URL_DEBUG_POR_DEFECTO = "http://192.168.1.142:8000"

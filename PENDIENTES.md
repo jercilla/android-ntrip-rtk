@@ -25,6 +25,13 @@ Lista viva de cosas a pulir una vez estén los hitos principales. No bloquean el
   (`AjustesApp.URL_DEBUG_POR_DEFECTO`). Hacerla opt-in y/o solo en build debug.
 - [ ] Revisar `network_security_config` (hoy permite tráfico en claro global por desarrollo).
 
+## Hardware / OTG
+
+- [ ] **Probar la `FuenteUsbSerie` por OTG** con el GPS USB genérico (Prolific PL2303,
+  NMEA a **4800** baud). Pendiente de un **adaptador OTG USB-C de datos** correcto: el
+  adaptador pasivo microUSB→USB-C no activa el modo host (ID pin vs CC pins), así que el
+  móvil no da corriente. El código del Hito 8 ya está hecho; falta el enlace físico.
+
 ## Pruebas / simulador
 
 - [ ] El NMEA simulado (`assets/simulacion_rtk.nmea`) formatea la latitud con ~2 cm de

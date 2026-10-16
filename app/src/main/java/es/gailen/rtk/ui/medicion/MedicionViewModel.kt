@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.gailen.rtk.datos.ajustes.AjustesRepository
+import es.gailen.rtk.datos.debug.RegistroDebugHttp
 import es.gailen.rtk.datos.fuente.GestorFuente
 import es.gailen.rtk.datos.ntrip.GestorNtrip
 import es.gailen.rtk.datos.puntos.PuntoMedido
@@ -39,6 +40,7 @@ class MedicionViewModel @Inject constructor(
     private val gestorNtrip: GestorNtrip,
     private val ajustesRepo: AjustesRepository,
     private val puntosRepo: PuntosRepository,
+    private val registro: RegistroDebugHttp,
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow(EstadoMedicion())
@@ -83,7 +85,18 @@ class MedicionViewModel @Inject constructor(
             sigmaHorizontal = r?.sigmaHorizontal,
             resultado = if (completa) r else null,
         )
-        if (completa) jobMedicion?.cancel()
+        if (completa) {
+            jobMedicion?.cancel()
+            r?.let {
+                registro.registra(
+                    "medicion",
+                    "COMPLETADA lat=${it.lat} lon=${it.lon} alt=${it.alturaElipsoidal} " +
+                        "σN=${"%.3f".format(it.sigmaNorte)} σE=${"%.3f".format(it.sigmaEste)} " +
+                        "σU=${"%.3f".format(it.sigmaAltura)} épocas=${it.epocasUsadas}/${it.epocasTotales} " +
+                        "fix=${"%.0f".format(it.porcentajeFix)}%",
+                )
+            }
+        }
     }
 
     fun cancelar() {
@@ -116,7 +129,12 @@ class MedicionViewModel @Inject constructor(
                 distanciaBase = gestorNtrip.distanciaBase.value,
                 fechaHoraUtc = System.currentTimeMillis(),
             )
-            puntosRepo.guardar(punto)
+            val id = puntosRepo.guardar(punto)
+            registro.registra(
+                "medicion",
+                "GUARDADO id=$id nombre='${punto.nombre}' jalon=${punto.alturaJalon} " +
+                    "cota=${"%.3f".format(punto.cotaSuelo)} perfil=${punto.perfilNtrip} dist=${punto.distanciaBase}",
+            )
             _estado.value = EstadoMedicion()
             onGuardado()
         }

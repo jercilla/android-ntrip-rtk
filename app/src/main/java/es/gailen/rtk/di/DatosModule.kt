@@ -3,12 +3,15 @@ package es.gailen.rtk.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import es.gailen.rtk.datos.ajustes.dataStore
+import es.gailen.rtk.datos.puntos.BaseDatos
+import es.gailen.rtk.datos.puntos.PuntoDao
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
@@ -31,4 +34,13 @@ object DatosModule {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
+
+    @Provides
+    @Singleton
+    fun proporcionarBaseDatos(@ApplicationContext contexto: Context): BaseDatos =
+        Room.databaseBuilder(contexto, BaseDatos::class.java, "rtk.db").build()
+
+    @Provides
+    fun proporcionarPuntoDao(bd: BaseDatos): PuntoDao = bd.puntoDao()
 }
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RTK Euskadi</string>
+
+    <!-- Navegación -->
+    <string name="nav_estado">Estado</string>
+    <string name="nav_medicion">Medir</string>
+    <string name="nav_puntos">Puntos</string>
+    <string name="nav_replanteo">Replanteo</string>
+    <string name="nav_ajustes">Ajustes</string>
+    <string name="nav_diagnostico">Diagnóstico</string>
+
+    <!-- Genérico -->
+    <string name="en_construccion">En construcción</string>
+    <string name="guardar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="editar">Editar</string>
+    <string name="aceptar">Aceptar</string>
+</resources>

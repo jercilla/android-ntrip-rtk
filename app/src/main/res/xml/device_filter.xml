@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Conversores USB-serie habituales. Los VID/PID van en DECIMAL. -->
+<resources>
+    <!-- Silicon Labs CP210x / CP2102N (Waveshare LC29H(DA) HAT): 0x10C4 = 4292 -->
+    <usb-device vendor-id="4292" />
+    <!-- FTDI: 0x0403 = 1027 -->
+    <usb-device vendor-id="1027" />
+    <!-- WCH CH34x: 0x1A86 = 6790 -->
+    <usb-device vendor-id="6790" />
+    <!-- Prolific PL2303: 0x067B = 1659 -->
+    <usb-device vendor-id="1659" />
+    <!-- CDC-ACM genérico (clase de comunicaciones = 2) -->
+    <usb-device class="2" />
+</resources>

@@ -1,0 +1,3 @@
+# Mantener la carpeta en git pero ignorar los datos de depuración recibidos.
+*
+!.gitignore

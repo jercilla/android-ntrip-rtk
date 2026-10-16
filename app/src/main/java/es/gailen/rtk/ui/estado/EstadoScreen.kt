@@ -2,7 +2,10 @@ package es.gailen.rtk.ui.estado
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +25,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +56,7 @@ fun EstadoScreen(viewModel: EstadoViewModel = hiltViewModel()) {
     val tipo by viewModel.tipoFuente.collectAsState()
     val estadoFuente by viewModel.estadoFuente.collectAsState()
     val posicion by viewModel.posicion.collectAsState()
+    val sesionActiva by viewModel.sesionActiva.collectAsState()
 
     val contexto = LocalContext.current
     var permiso by remember { mutableStateOf(tienePermisoUbicacion(contexto)) }
@@ -60,6 +66,10 @@ fun EstadoScreen(viewModel: EstadoViewModel = hiltViewModel()) {
         permiso = concedido
         if (concedido) viewModel.conectar()
     }
+    // Permiso de notificaciones (Android 13+): se pide al iniciar la sesión.
+    val lanzadorNotif = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { viewModel.iniciarSesion() }
 
     LaunchedEffect(tipo, permiso) {
         if (tipo == FuentePosicionTipo.GPS_MOVIL) {
@@ -75,6 +85,25 @@ fun EstadoScreen(viewModel: EstadoViewModel = hiltViewModel()) {
             .padding(16.dp),
     ) {
         TarjetaCalidad(posicion, estadoFuente)
+
+        Spacer(Modifier.height(12.dp))
+        TarjetaSesion(
+            activa = sesionActiva,
+            onToggle = { activar ->
+                if (activar) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        !tienePermiso(contexto, Manifest.permission.POST_NOTIFICATIONS)
+                    ) {
+                        lanzadorNotif.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        viewModel.iniciarSesion()
+                    }
+                } else {
+                    viewModel.pararSesion()
+                }
+            },
+            onBateria = { abrirAjustesBateria(contexto) },
+        )
 
         if (tipo == FuentePosicionTipo.GPS_MOVIL && !permiso) {
             Spacer(Modifier.height(12.dp))
@@ -129,6 +158,31 @@ private fun TarjetaPermiso(onConceder: () -> Unit) {
                 Icon(Icons.Filled.MyLocation, contentDescription = null)
                 Text("Conceder permiso", modifier = Modifier.padding(start = 8.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaSesion(activa: Boolean, onToggle: (Boolean) -> Unit, onBateria: () -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.weight(1f)) {
+                    Text("Sesión en segundo plano", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        if (activa) "Activa: sigue con la pantalla apagada" else "Inactiva",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(checked = activa, onCheckedChange = onToggle)
+            }
+            TextButton(onClick = onBateria) { Text("Excluir de la optimización de batería") }
+            Text(
+                "En Xiaomi (MIUI/HyperOS): activa además el «Inicio automático» de la app y pon la batería en «Sin restricciones».",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -201,5 +255,16 @@ private fun fmt(v: Double?, patron: String, sufijo: String = ""): String =
     if (v == null || v.isNaN()) "—" else String.format(Locale.US, patron, v) + sufijo
 
 private fun tienePermisoUbicacion(contexto: Context): Boolean =
-    ContextCompat.checkSelfPermission(contexto, Manifest.permission.ACCESS_FINE_LOCATION) ==
-        PackageManager.PERMISSION_GRANTED
+    tienePermiso(contexto, Manifest.permission.ACCESS_FINE_LOCATION)
+
+private fun tienePermiso(contexto: Context, permiso: String): Boolean =
+    ContextCompat.checkSelfPermission(contexto, permiso) == PackageManager.PERMISSION_GRANTED
+
+private fun abrirAjustesBateria(contexto: Context) {
+    runCatching {
+        contexto.startActivity(
+            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }
+}

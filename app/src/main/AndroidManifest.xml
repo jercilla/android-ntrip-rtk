@@ -55,5 +55,10 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
+
+        <service
+            android:name=".datos.servicio.ServicioSesion"
+            android:exported="false"
+            android:foregroundServiceType="location|connectedDevice" />
     </application>
 </manifest>

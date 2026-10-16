@@ -1,5 +1,9 @@
 package es.gailen.rtk.ui.puntos
 
+import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,17 +62,43 @@ fun PuntosScreen(viewModel: PuntosViewModel = hiltViewModel()) {
         return
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
-    ) {
-        items(puntos, key = { it.id }) { punto ->
-            FilaPunto(
-                punto = punto,
-                onEditar = { enEdicion = punto },
-                onBorrar = { viewModel.borrar(punto.id) },
-            )
+    val contexto = LocalContext.current
+
+    val lanzadorCsv = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv"),
+    ) { uri ->
+        uri?.let { viewModel.exportar(it, FormatoExport.CSV) { ok -> aviso(contexto, "CSV", ok) } }
+    }
+    val lanzadorGeoJson = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/geo+json"),
+    ) { uri ->
+        uri?.let { viewModel.exportar(it, FormatoExport.GEOJSON) { ok -> aviso(contexto, "GeoJSON", ok) } }
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(onClick = { lanzadorCsv.launch("puntos_rtk.csv") }, modifier = Modifier.weight(1f)) {
+                Text("Exportar CSV")
+            }
+            Button(onClick = { lanzadorGeoJson.launch("puntos_rtk.geojson") }, modifier = Modifier.weight(1f)) {
+                Text("Exportar GeoJSON")
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp),
+        ) {
+            items(puntos, key = { it.id }) { punto ->
+                FilaPunto(
+                    punto = punto,
+                    onEditar = { enEdicion = punto },
+                    onBorrar = { viewModel.borrar(punto.id) },
+                )
+            }
         }
     }
 
@@ -111,6 +143,11 @@ private fun FilaPunto(punto: PuntoMedido, onEditar: () -> Unit, onBorrar: () -> 
             IconButton(onClick = onBorrar) { Icon(Icons.Filled.Delete, contentDescription = "Borrar") }
         }
     }
+}
+
+private fun aviso(contexto: Context, formato: String, ok: Boolean) {
+    val texto = if (ok) "$formato exportado" else "Error al exportar $formato"
+    Toast.makeText(contexto, texto, Toast.LENGTH_SHORT).show()
 }
 
 @Composable

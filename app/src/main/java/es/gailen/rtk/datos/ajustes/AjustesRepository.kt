@@ -50,6 +50,7 @@ class AjustesRepository @Inject constructor(
             alturaJalonMetros = p[Claves.ALTURA_JALON] ?: 0.0,
             duracionMedicionSegundos = p[Claves.DURACION] ?: 60,
             aceptarFloat = p[Claves.ACEPTAR_FLOAT] ?: false,
+            urlDebug = p[Claves.URL_DEBUG] ?: AjustesApp.URL_DEBUG_POR_DEFECTO,
         )
     }
 
@@ -87,6 +88,9 @@ class AjustesRepository @Inject constructor(
 
     suspend fun actualizarAceptarFloat(aceptar: Boolean) =
         dataStore.edit { it[Claves.ACEPTAR_FLOAT] = aceptar }
+
+    suspend fun actualizarUrlDebug(url: String) =
+        dataStore.edit { it[Claves.URL_DEBUG] = url.trim() }
 
     // --- Perfiles (configuración, sin secretos) ---
 
@@ -149,6 +153,7 @@ class AjustesRepository @Inject constructor(
         val ALTURA_JALON = doublePreferencesKey("altura_jalon")
         val DURACION = intPreferencesKey("duracion_medicion")
         val ACEPTAR_FLOAT = booleanPreferencesKey("aceptar_float")
+        val URL_DEBUG = stringPreferencesKey("url_debug")
         val PERFILES = stringPreferencesKey("perfiles_json")
 
         fun credUsuario(id: String) = stringPreferencesKey("$PREFIJO_CRED_USUARIO$id")

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Desarrollo: se permite tráfico en claro (HTTP) para el servidor de depuración de
+     la red local. El caster NTRIP usa socket TCP plano, no HTTPS, así que esto no le
+     afecta. Revisar/endurecer antes de una posible publicación. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

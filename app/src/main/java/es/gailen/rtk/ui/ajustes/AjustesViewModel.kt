@@ -42,6 +42,7 @@ class AjustesViewModel @Inject constructor(
     fun cambiarAlturaJalon(metros: Double) = lanzar { repo.actualizarAlturaJalon(metros) }
     fun cambiarDuracion(segundos: Int) = lanzar { repo.actualizarDuracionMedicion(segundos) }
     fun cambiarAceptarFloat(aceptar: Boolean) = lanzar { repo.actualizarAceptarFloat(aceptar) }
+    fun cambiarUrlDebug(url: String) = lanzar { repo.actualizarUrlDebug(url) }
 
     // --- Perfiles ---
     fun seleccionarPerfilActivo(id: String) = lanzar { repo.actualizarPerfilActivo(id) }

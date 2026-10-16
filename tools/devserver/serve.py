@@ -240,6 +240,8 @@ class Manejador(BaseHTTPRequestHandler):
             sello = dt.datetime.now().isoformat(timespec="milliseconds")
             with fichero.open("a", encoding="utf-8") as f:
                 f.write(f"{sello}\t{linea}\n")
+            # Eco por stdout para poder seguir la telemetría en vivo.
+            print(f"[{sello}] [{sesion}] {linea}", flush=True)
             self._json(200, {"ok": True, "fichero": str(fichero.relative_to(CONF["datos"]))})
 
         else:

@@ -78,6 +78,11 @@ fun AjustesScreen(viewModel: AjustesViewModel = hiltViewModel()) {
             onAceptarFloat = viewModel::cambiarAceptarFloat,
         )
         EspacioSeccion()
+        SeccionDiagnostico(
+            url = estado.ajustes.urlDebug,
+            onUrl = viewModel::cambiarUrlDebug,
+        )
+        EspacioSeccion()
         SeccionPerfiles(
             estado = estado,
             onSeleccionar = viewModel::seleccionarPerfilActivo,
@@ -171,6 +176,25 @@ private fun SeccionMedicion(
         Text("Aceptar épocas RTK float", modifier = Modifier.weight(1f))
         Switch(checked = ajustes.aceptarFloat, onCheckedChange = onAceptarFloat)
     }
+}
+
+@Composable
+private fun SeccionDiagnostico(url: String, onUrl: (String) -> Unit) {
+    TituloSeccion("Diagnóstico")
+    var texto by remember { mutableStateOf(url) }
+    OutlinedTextField(
+        value = texto,
+        onValueChange = { texto = it; onUrl(it) },
+        label = { Text("URL del servidor de depuración") },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Text(
+        "La app envía telemetría (estado de la fuente, posiciones, errores) a este servidor. Vacío = desactivado.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp),
+    )
 }
 
 @Composable

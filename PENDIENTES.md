@@ -27,10 +27,12 @@ Lista viva de cosas a pulir una vez estén los hitos principales. No bloquean el
 
 ## Hardware / OTG
 
-- [ ] **Probar la `FuenteUsbSerie` por OTG** con el GPS USB genérico (Prolific PL2303,
-  NMEA a **4800** baud). Pendiente de un **adaptador OTG USB-C de datos** correcto: el
-  adaptador pasivo microUSB→USB-C no activa el modo host (ID pin vs CC pins), así que el
-  móvil no da corriente. El código del Hito 8 ya está hecho; falta el enlace físico.
+- [x] **`FuenteUsbSerie` por OTG probada** (2026-10-17) con el GPS USB genérico
+  (Prolific PL2303, NMEA a **4800**). Cadena OTG→serie→NMEA→parser verificada: detección,
+  permiso USB, apertura a 4800 y NMEA limpio entrando. Hizo falta un **adaptador OTG USB-C
+  de datos** (el pasivo micro→C no hace host). Sin fix por estar en interior (normal).
+- [ ] **Reabrir el puerto automáticamente al cambiar el baudrate** (ahora hay que conmutar
+  la fuente para que se aplique).
 
 ## Pruebas / simulador
 

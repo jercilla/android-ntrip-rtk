@@ -66,6 +66,7 @@ class FuenteUsbSerie(
     private var ultimoRmc: SentenciaRmc? = null
     private var ultimoGst: SentenciaGst? = null
     private var bytesLeidos = 0L
+    private var lineasTotales = 0
 
     private val usbManager get() = context.getSystemService(Context.USB_SERVICE) as UsbManager
 
@@ -134,10 +135,19 @@ class FuenteUsbSerie(
         bytesLeidos += data.size
         for (linea in ensamblador.agregar(data)) {
             _nmea.tryEmit(linea)
+            lineasTotales++
+            // Telemetría: primeras líneas verbatim + resumen periódico (para diagnosticar el baud/NMEA).
+            if (lineasTotales <= 6) registro?.registra("usb", "nmea[$lineasTotales]: $linea")
+            else if (lineasTotales % 40 == 0) {
+                registro?.registra("usb", "bytes=$bytesLeidos lineas=$lineasTotales ultima='$linea'")
+            }
             when (val s = ParserNmea.parsear(linea)) {
                 is SentenciaRmc -> ultimoRmc = s
                 is SentenciaGst -> ultimoGst = s
                 is SentenciaGga -> {
+                    if (lineasTotales <= 60) {
+                        registro?.registra("usb", "GGA calidad=${s.calidad} sat=${s.satelites} lat=${s.lat} lon=${s.lon}")
+                    }
                     val sentencias = listOfNotNull(s, ultimoRmc, ultimoGst)
                     ConstructorPosicion.construir(sentencias)?.let { _posiciones.tryEmit(it) }
                 }
